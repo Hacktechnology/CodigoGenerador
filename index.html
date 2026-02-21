@@ -20,9 +20,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
 
+        /* --- PANTALLA DE BLOQUEO --- */
+        #lock-screen {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 25px;
+            border: 1px solid var(--neon-blue);
+            backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 350px;
+        }
+
+        /* --- INTERFAZ DEL GENERADOR --- */
         .glass-card {
             width: 95%;
             max-width: 400px;
@@ -32,23 +45,11 @@
             border-radius: 30px;
             padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.1);
+            display: none; 
         }
 
-        .ht-logo {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px var(--neon-blue);
-            margin-bottom: 5px;
-        }
-
-        .title-script {
-            font-family: 'Brush Script MT', cursive;
-            font-size: 2.2rem;
-            color: var(--neon-green);
-            margin: 0;
-        }
+        .ht-logo { font-size: 3.5rem; font-weight: 900; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
+        .title-script { font-family: 'Brush Script MT', cursive; font-size: 2.2rem; color: var(--neon-green); margin: 0; }
 
         .input-key {
             width: 100%;
@@ -60,36 +61,14 @@
             font-size: 1.1rem;
             text-align: center;
             margin-top: 20px;
+            box-sizing: border-box;
             outline: none;
-        }
-
-        /* LÍNEA DE RESULTADO */
-        #result-area {
-            margin-top: 25px;
-            display: none;
-            animation: slideUp 0.4s ease;
-        }
-
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .output-line {
-            width: 100%;
-            background: rgba(57, 255, 20, 0.1);
-            border: 1px solid var(--neon-green);
-            color: var(--neon-green);
-            padding: 15px;
-            border-radius: 12px;
-            font-family: monospace;
-            font-size: 1.4rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
         }
 
         .btn-glow {
             width: 100%;
             padding: 18px;
-            background: #28a745; /* Verde corporativo */
+            background: #28a745;
             color: white;
             border: none;
             border-radius: 15px;
@@ -99,85 +78,103 @@
             margin-top: 15px;
         }
 
+        .output-line {
+            background: rgba(57, 255, 20, 0.1);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 15px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
         .btn-whatsapp {
             width: 100%;
             padding: 15px;
             background: #25d366;
             color: white;
-            border: none;
             border-radius: 12px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             text-decoration: none;
-            margin-top: 10px;
-        }
-
-        .footer {
-            margin-top: 30px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.2);
-            letter-spacing: 1px;
+            display: block;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="glass-card">
+    <div id="lock-screen">
+        <div class="ht-logo" style="font-size: 2rem;">HT ADMIN</div>
+        <p style="font-size: 0.9rem; opacity: 0.8;">SISTEMA RESTRINGIDO</p>
+        <input type="password" id="master-pass" class="input-key" placeholder="Introduce Clave Maestra">
+        <button class="btn-glow" onclick="verificarMaestra()">ENTRAR</button>
+    </div>
+
+    <div class="glass-card" id="main-generator">
         <div class="ht-logo">HT</div>
         <div class="title-script">Generador de Llave</div>
-        <div style="color:var(--neon-blue); font-size: 0.9rem; letter-spacing: 2px;">CALCULADORA DE BOLSILLO</div>
+        <div style="color:var(--neon-blue); font-size: 0.8rem;">CALCULADORA DE BOLSILLO</div>
 
-        <input type="text" id="id-cliente" class="input-key" placeholder="Pega el ID del cliente aquí">
-
+        <input type="text" id="id-cliente" class="input-key" placeholder="ID del cliente (Ej: HT-654-1)">
         <button class="btn-glow" onclick="generarTodo()">GENERAR LICENCIA PRO</button>
 
-        <div id="result-area">
-            <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px;">LLAVE COPIADA:</p>
+        <div id="result-area" style="display:none; margin-top: 20px;">
+            <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px;">LLAVE COPIADA AL PORTAPAPELES:</p>
             <div id="output-key" class="output-line"></div>
-            
-            <a id="wa-link" href="#" target="_blank" class="btn-whatsapp">
-                ENVIAR POR WHATSAPP
-            </a>
-        </div>
-
-        <div class="footer">
-            HACKTECHNOLOGY ADMIN SUITE v2.0
+            <a id="wa-link" href="#" target="_blank" class="btn-whatsapp">ENVIAR POR WHATSAPP</a>
         </div>
     </div>
 
     <script>
+        // TU NUEVA CLAVE MAESTRA
+        const CLAVE_MAESTRA = "grh8690"; 
+
+        function verificarMaestra() {
+            const pass = document.getElementById('master-pass').value;
+            if (pass === CLAVE_MAESTRA) {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('main-generator').style.display = 'block';
+            } else {
+                alert("❌ Clave Maestra Incorrecta");
+            }
+        }
+
         function generarTodo() {
             const id = document.getElementById('id-cliente').value.trim();
             if(!id) return alert("Por favor, ingresa el ID del cliente");
 
-            // 1. Generar Llave
+            // Lógica de llave Pro
             const llave = id.toUpperCase() + "-PRO";
             
-            // 2. Calcular fecha de vencimiento (30 días desde hoy)
+            // Cálculo automático de 30 días
             const hoy = new Date();
             hoy.setDate(hoy.getDate() + 30);
             const fechaVenc = hoy.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-            // 3. Mostrar en pantalla
             document.getElementById('result-area').style.display = 'block';
             document.getElementById('output-key').innerText = llave;
-
-            // 4. Copiar al portapapeles automáticamente
+            
+            // Copiado automático
             navigator.clipboard.writeText(llave);
 
-            // 5. Configurar enlace de WhatsApp con el mensaje completo
+            // Mensaje profesional para WhatsApp
             const mensaje = encodeURIComponent(
-                `🔑 *HACKTECHNOLOGY LICENCIA PRO*\n\n` +
-                `Hola, aquí tienes tu llave de activación:\n` +
+                `🔑 *HACKTECHNOLOGY - ACCESO PRO*\n\n` +
+                `Hola, aquí tienes tu llave para la calculadora:\n` +
                 `👉 *${llave}*\n\n` +
-                `📅 *Vence el:* ${fechaVenc}\n` +
-                `¡Gracias por preferir HackTechnology!`
+                `📅 *Licencia válida hasta:* ${fechaVenc}\n` +
+                `¡Gracias por confiar en HackTechnology!`
             );
-            
             document.getElementById('wa-link').href = `https://wa.me/?text=${mensaje}`;
         }
+
+        // Permitir entrar presionando "Enter"
+        document.getElementById("master-pass").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                verificarMaestra();
+            }
+        });
     </script>
 </body>
 </html>
