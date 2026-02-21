@@ -1,1 +1,1 @@
-# CodigoDeGenerador
+# Generador
